@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text">
+    <button id="btn">Click</button>
+    <script>
+        window.onload=function(){
+            var oBtn=document.getElementById("btn");
+            var oInput=document.getElementsByTagName("input")[0];
+            oBtn.onclick=function(){
+                var val=oInput.value;
+                localStorage.setItem("value",val);
+            }
+        }
+    </script>
+    <script>
+        // console.log([typeof null, null instanceof Object])
+        // ["object",false]
+        // instanceof 运算符是用来测试一个对象在其原型链构造函数上是否具有 prototype 属性，
+        // null 值并不是以 Object 原型建出来的，所以 null instanceof Object 返回 false。
+        // instanceof 用来判断右边的值是否为左边对象的构造函数，或原型对象上的构造函数
+        // 用于检测构造函数的prototype属性，是否出现在某个实例对象的原型链上
+        
+        // 给定一个整数数组， 找到从三个整数中产生的最大乘积
+        // const unsortedArray = [-10, 7, 2, 3,5, -1, -7];
+        // computeProduct(unsortedArray)
+//         首先需要后端配置：Access-Control-Allow-Origin 为true，允许跨域。如果需要携带cookie则需要设置Access-Control-Allow-Credentials 为true。我们在请求时withCredentials设置为true。
+
+// CORS 比JSONP更灵活些，支持的请求方式多些
+
+        // cors：跨域资源共享，是一种基于HTTP头的机制，该机制通过允许服务器标识，除了自己以为的其它origin(域，协议，端口)，这样的浏览器可以加载这些资源，其次cors对浏览器不同种类的请求，进行了相关的要求，
+
+        // 单点登录：是指在同一个账户平台下的多个应用系统，用户只需登陆一次，便可实现所有相互信任的应用系统
+        // eg: 百度旗下有百度贴吧，百度网盘
+        // 单点登陆的关键：如何让sessionid,或 
+        // https://blog.csdn.net/weixin_42851117/article/details/109128876
+
+        // window.addEventListener('message',function(e){
+        //     console.log('message',e)
+        // })
+        let arr = [1,2,3,4,1,2,2,2]
+        let res = [1,2]
+        const filterArr = (arr) => {
+            let singleItem = [...new Set(arr)]
+            arr.filter(item => {
+                
+            })
+        }
+
+
+    </script>
+</body>
+</html>

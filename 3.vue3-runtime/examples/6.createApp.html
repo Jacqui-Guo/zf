@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/@vue/runtime-dom/dist/runtime-dom.global.js"></script>
+    <script>
+        let {createApp,h,reactive} = VueRuntimeDOM;
+        /**
+         * createApp 
+         * 参数一：组件以哪个组件作为入口，
+         * 参数二：props
+         * 
+        */
+
+        let App = {
+            setup(props) {
+                const state = reactive({count: 1});
+                return () => {
+                    console.log(state.count)
+                }
+            },
+            // render() {
+            //     return h('div',{style:{color: red}},'hello world');
+            // }
+        }
+        createApp(App).mount('#app');
+
+    </script>
+</body>
+</html>
