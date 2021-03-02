@@ -62,16 +62,52 @@
     // 添加元素(指定位置添加) 
     // 描述：在数组arr的index处添加元素item，不要直接修改数组arr，结果返回新的数组 [1,2,3] 2,6 结果为[1,2,6,3]
 
-    let arr = [1,2,3];        
-    let index = 2;
-    let item = 6;
-    function insertItem(arr,index,item) {
-        let _tmp = arr;
-        _tmp.splice(index,0,item);
-        return _tmp;
-    }       
-    let res = insertItem(arr,index,item);
-    console.log(res);
+    // let arr = [1,2,3];        
+    // let index = 2;
+    // let item = 6;
+    // function insertItem(arr,index,item) {
+    //     let _tmp = arr;
+    //     _tmp.splice(index,0,item);
+    //     return _tmp;
+    // }       
+    // let res = insertItem(arr,index,item);
+    // console.log(res);
+    // 找出数组arr中重复出现过的元素 [1,2,3,4,1,2,2,2] [1,2]
+
+    // let arr = [1,2,3,4,1,2,2,2,6,7,6];
+    // function findRepeatItem(arr) {
+    //     let _sortAfterArr = arr.sort()
+    //     let _tmp = new Set();
+
+    //     for(let i = 0;i<_sortAfterArr.length-1;i++) {
+    //         if(arr[i] === arr[i+1]) { 
+    //             _tmp.add(arr[i])
+    //         }
+    //     }
+    //     return [..._tmp];
+    // }
+    // let res = findRepeatItem(arr)
+    // console.log('result',res);
+    let arr = [1,2,3,4,1,2,2,2,6,7,6];
+    function findRepeatItem(arr) {
+        let result = []
+        arr.reduce((a,c) => { // 1、a={},c=1 2、a={1:1} c=2 
+            // if(a[c]) !result.includes(c) && result.push(c);
+            // else a[c]=1;
+            // return a
+            console.log('---',a,c,result);
+            if(a[c]) {
+                !result.includes(c) && result.push(c);
+            } else {
+                a[c] = 1;  // {1:1} {1:1,2:1,3:1,4:1}
+            }
+            return a;
+        }, {});
+        return result
+    }
+    let res = findRepeatItem(arr);
+    console.log('---',res);
+
     </script>
 </body>
 </html>

@@ -798,15 +798,56 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
    }
    ```
 
-
-
 6. xx
 
    如何实现同一浏览器多个标签页之间的通信
 
    https://blog.csdn.net/liwenfei123/article/details/79996161
 
-7. 
+7. 获取数组中重复出现的元素
+
+   ```js
+   方式一：
+   let arr = [1,2,3,4,1,2,2,2,6,7,6];
+   function findRepeatItem(arr) {
+     let result = []
+     arr.reduce((a,c) => { // 1、a={},c=1 2、a={1:1} c=2 
+       // if(a[c]) !result.includes(c) && result.push(c);
+       // else a[c]=1;
+       // return a
+       console.log('---',a,c,result);
+       if(a[c]) {
+         !result.includes(c) && result.push(c);
+       } else {
+         a[c] = 1;  // {1:1} {1:1,2:1,3:1,4:1}
+       }
+       return a;
+     }, {});
+     return result
+   }
+   let res = findRepeatItem(arr);
+   console.log('---',res); // [1,2,6]
+   
+   方式二：
+   let arr = [1,2,3,4,1,2,2,2,6,7,6];
+   function findRepeatItem(arr) {
+     let _sortAfterArr = arr.sort()
+     let _tmp = new Set();
+   
+     for(let i = 0;i<_sortAfterArr.length-1;i++) {
+       if(arr[i] === arr[i+1]) { 
+         _tmp.add(arr[i])
+       }
+     }
+     return [..._tmp];
+   }
+   let res = findRepeatItem(arr)
+   console.log('result',res);// [1,2,6]
+   ```
+
+   
+
+8. 
 
 ### vue
 
@@ -1191,8 +1232,23 @@ export const patchProps = (el,key,prevValue,nextValue) => {
           }
       }
   }
-  ```
-
   
+```
 
-* 
+#### 虚拟dom的创建
+
+* 元素渲染需要虚拟dom和容器
+  * 创建虚拟dom
+
+#### 将元素渲染到页面
+
+* 将虚拟节点和容器获取到后调用render方法进行渲染
+
+```js
+0b 表示二进制
+     00000001 == 1*2^0
+		 00000011 == 1*2^1 + 1*2^0	
+1<<1 00000010 == 1*2^1 + 0*2^0 =》2
+1<<2 00000100 == 1*2^2 + 0*2^0
+```
+

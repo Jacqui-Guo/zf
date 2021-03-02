@@ -14,7 +14,7 @@ export const nodeOps = {
     insertElement: (element,parent,anchor = null) => { // 第三个参数，参照物
         parent.insertBefore(element,anchor); // 当anchor为null的时候，相当于appendChild
     },
-    querySelector: selector => document.querySelector('selector'),
+    querySelector: selector => document.querySelector(selector),
     setElementText: (el, text) => el.textContent = text,
     // 文本操作 创建文本 
     createText: text => document.createTextNode(text),

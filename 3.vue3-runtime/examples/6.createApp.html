@@ -16,19 +16,18 @@
          * 参数二：props
          * 
         */
-
         let App = {
-            setup(props) {
-                const state = reactive({count: 1});
-                return () => {
-                    console.log(state.count)
-                }
-            },
-            // render() {
-            //     return h('div',{style:{color: red}},'hello world');
-            // }
+            // setup(props) {
+            //     const state = reactive({count: 1});
+            //     return () => {
+            //         console.log(state.count)
+            //     }
+            // },
+            render() {
+                return h('div',{style:{color: red}},'hello world');
+            }
         }
-        createApp(App).mount('#app');
+        createApp(App,{name:'zs',age:20}).mount('#app');
 
     </script>
 </body>
