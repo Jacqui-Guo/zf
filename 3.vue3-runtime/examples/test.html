@@ -43,16 +43,35 @@
         // window.addEventListener('message',function(e){
         //     console.log('message',e)
         // })
-        let arr = [1,2,3,4,1,2,2,2]
-        let res = [1,2]
-        const filterArr = (arr) => {
-            let singleItem = [...new Set(arr)]
-            arr.filter(item => {
+        // let arr = [1,2,3,4,1,2,2,2]
+        // let res = [1,2]
+        // const filterArr = (arr) => {
+        //     let singleItem = [...new Set(arr)]
+        //     arr.filter(item => {
                 
-            })
-        }
+        //     })
+        // }
 
+                
+    // 优先级顺序  请输出结果并进行解释
+    // var val = 'smtg';
+    // console.log('Value is ' + (val === 'smtg') ? 'Something' : 'Nothing'); 
 
+    // Value is Something
+
+    // 添加元素(指定位置添加) 
+    // 描述：在数组arr的index处添加元素item，不要直接修改数组arr，结果返回新的数组 [1,2,3] 2,6 结果为[1,2,6,3]
+
+    let arr = [1,2,3];        
+    let index = 2;
+    let item = 6;
+    function insertItem(arr,index,item) {
+        let _tmp = arr;
+        _tmp.splice(index,0,item);
+        return _tmp;
+    }       
+    let res = insertItem(arr,index,item);
+    console.log(res);
     </script>
 </body>
 </html>
