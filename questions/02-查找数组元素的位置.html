@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 找出元素item在给定数组arr中的位置 
+        // 描述：如果数组中存在item就返回元素在数组中的位置，否则就会返回-1 [1,2,3,4,5,6] --> 存在3就输出2，存在7输出-1
+
+        function findIndex(item) {
+            let arr = [1,2,3,4,5,6];
+            let index = arr.indexOf(item);
+            return index;
+        }
+
+        let res = findIndex(7);
+        console.log(res);
+    </script>
+</body>
+</html>

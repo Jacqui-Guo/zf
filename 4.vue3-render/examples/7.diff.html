@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="../node_modules/@vue/runtime-dom/dist/runtime-dom.global.js"></script>
+    <div id="app"></div>
+    <script>
+        let {createApp,h,reactive,ref} = VueRuntimeDOM;
+        let App = {
+            setup(props,context) {
+                // let state = reactive({name:'zf'})
+                // let fn = function() {
+                //     state.name = 'aaa';
+                // }
+                let flag = ref(true);
+                setTimeout(() => {
+                    flag.value = false;
+                },1000)
+
+                return ()=>{
+                    return flag.value ? 
+                        // h('div',{style:{color:'red'}},'zf') : 
+                        // h('p',{style:{color:'blue'}},'郭静杰') 
+                        h('div',{style:{color:'red'}},[
+                            h('li',{key:'a'},'a'),
+                            h('li',{key:'b'},'b'),
+                            h('li',{key:'c'},'c')
+                        ]) : 
+                        h('p',{style:{color:'blue'}},[
+                            h('li',{key:'a'},'a'),
+                            h('li',{key:'b'},'b'),
+                            h('li',{key:'d'},'d'),
+                            h('li',{key:'e'},'e')
+                        ]) 
+                    // return h('div',{onClick:fn},state.name);
+
+                }
+            }
+        }
+        let app = createApp(App,{name:'zf',age:12});
+        app.mount('#app');
+
+        // vue3组件渲染流程：将组件变成vnode -> 再将vnode变成真实的dom元素 -》插入到页面上
+        // render方法的作用可以渲染一个虚拟节点，将它挂载具体的dom元素上
+        // vue3执行的核心就在patch方法上
+        // 组件创造的过程中，
+          // 创造一个instance -> 初始化
+          // 根据用户传入的组件，拿到对应的内容 来填充这个instance对象 
+
+        /**
+         * 组件渲染的顺序：
+         *   - 先父后子，执行顺序是深度优先
+         * 
+         * 每个组件都是一个effect函数
+         */
+    </script>
+</body>
+</html>

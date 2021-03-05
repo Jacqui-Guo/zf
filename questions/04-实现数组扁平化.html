@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 如何实现数组扁平化？
+        const arr = [1, [2, [3, [4, 5]]], 6];
+        // => [1, 2, 3, 4, 5, 6]
+
+        // let res = arr.flat(Infinity)
+        // console.log(res);
+
+        // const flatten = (arr) => {
+        //     return arr.reduce((prev,cur) => {
+        //         return prev.concat(Array.isArray(cur) ? flatten(cur) : cur) 
+        //     },[])
+        // }
+        // let res = flatten(arr)
+        // console.log(res);
+        let res = JSON.parse(`[${JSON.stringify(arr).replace(/\[|\]/g,'')}]`)
+        console.log(res)
+    </script>
+</body>
+</html>

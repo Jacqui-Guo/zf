@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 给定一个整数数组，请找出两个元素之间的最大差，较小值的元素必须位于较大元素之前
+        const array = [7, 8, 15, 9, 20, 3, 1, 10];
+       
+        function findLargestDifference(array) {
+            let obj = {};
+            let _tmp;
+            array.reduce((pre,cur) => {
+                _tmp = cur - pre;
+                obj[_tmp] = `${pre},${cur}`
+                return Math.min(pre,cur)
+            })
+            let diffArr = Object.keys(obj)
+            let maxDiff = Math.max(...diffArr)
+            let maxItem = obj[maxDiff]
+            console.log(maxDiff,maxItem); // 13, 7,20
+        }
+        findLargestDifference(array);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // function findLargestDifference(array) { //符合条件的两个数字:7和20
+        //     var obj = {};
+        //     array.reduce(function (pre,cur) {
+        //         console.log('xxxx',pre);
+        //         const diff = cur - pre;
+        //         obj[diff] = true;
+
+        //         return Math.min(pre, cur)
+        //     })
+        //     console.log(obj)
+        //     return Math.max(...Object.keys(obj))
+        // }
+        // let res = findLargestDifference(array);
+        // console.log(res);
+    </script>
+</body>
+</html>

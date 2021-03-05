@@ -241,7 +241,7 @@ Promise.race([methods1,methods2,....]).then(data => {
 
 #### vue3与vue2的区别
 
-1. vue3源码采用 `monrepo` 
+1. vue3源码采用 `monrepo` ，目前只有 `yarn ` 才支持
 
 2. vue2后期引入`rfc` 使每个版本可控
 
@@ -530,15 +530,118 @@ reactive/shallowReactive/readonly/shallowReadonly({name:'zs'})
 #### 手写实现⬆️的四个API
 
 ```js
-/***
- * 1、创建四个函数 reactive(整个数据都是响应式的)，shallowReactive(只有数据的第一层是响应式的)，readonly(数据是只读的)，shallowReadonly(只有第一层数据是只读的)
- * 2、创建一个响应式函数，根据传递的参数不同(target,isReadonly,响应式函数)，实现不同的功能
- *   + 判断拦截的对象是不是object,如果不是，直接返回
- *   + 根据是不是只读的，将target存入到不同的存储栈中
- *   + 存储之前，判断存储栈中是否已经存在过(即是判断当前target是否已经被代理过)，存在直接返回target    
- * 3、
+ 1、创建四个函数 reactive(整个数据都是响应式的)，shallowReactive(只有数据的第一层是响应式的)，readonly(数据是只读的)，shallowReadonly(只有第一层数据是只读的)
+ 2、创建一个响应式函数，根据传递的参数不同(target,isReadonly,响应式函数)，实现不同的功能
+   + 判断拦截的对象是不是object,如果不是，直接返回
+   + 根据是不是只读的，将target存入到不同的存储栈中
+   + 存储之前，判断存储栈中是否已经存在过(即是判断当前target是否已经被代理过)，存在直接返回target    
+ 3、创建proxy的拦截函数 createGetter,createSetter（封装了一个函数，处理上面对应的四种情况）
+   + createGetter  
+   		+ let res = Reflect.get(target,key,receiver);
+      + 判断是否是 isReadonly,如果不是只读的，进行依赖收集(当使用了effect()的时候才会执行effect对应的函数，否则effect栈中是空的，会直接返回)
+      + 判断是否是shallow,如果是，直接返回 res
+      + 判断res是否是object,对其进行递归处理
+   + createSetter
+      + 先获取到 oldValue
+      + 判断target上有没有key,还要考虑当前target为数组/object两种情况
+         + array情况：判断当前修改的数组的索引是否大于数组的长度
+      + 调用trigger方法，触发更新 
+```
+#### 手写effect函数
+
+###### effect函数的使用
+
+```js
+/*
+ * 1、effect中所有属性，都会收集effect  （track函数）
+ * 2、当这个属性值发生变化的时候，会重新执行effect （trigger函数）
+ */
+let state = reactive({name:'zs',arr:[1,2,3]})
+effect(()=>{
+  app.innerHTML = state.arr;
+}) 
+setTimeOut(() => {
+  state.arr[100] = 1;
+},1000)
+
+trigger 函数 找属性对应的effect 让其执行 （数组、对象）
+```
+
+###### 手写effect函数
+
+```js
+export function effect(fn,options={}){
+  // 1、需要将这个数据变成响应式的，createReactiveEffect,可以做到数据变化重新执行
+  const effect = createReactiveEffect();
+  
+  // effect函数调用的时候，默认会先执行一次
+  if(!options.lazy){
+    effect()
+  } 
+  return effect;
+}
+
+let activeEffect;
+let effectStack = [];
+
+const createReactiveEffect = (fn,options) => {
+  const effect = function reactiveEffect() {
+    try {
+      if(!effectStack.includes(effect)) {
+         effectStack.push(effect);
+         activeEffect = effect;
+         return fn(); // 这样就会执行reactive中的get，或set方法
+      }
+    }finally {
+      effectStack.pop();
+      activeEffect = effectStack[effectStack.length-1]
+    }
+  }
+  return effect;
+}
+```
+#### 手写依赖收集 track
+
+> 所谓的依赖收集，就是收集当前target对应的effect函数
+
+```js
+const targetMap = new WeakMap();
+export function track(target,type,key){ 
+  if(activEffect === undefined) return;
+  
+  let depsMap = targetMap.get(target);
+  if(!depsMap){
+    depsMap.set(target,(depsMap=new map))
+  }
+  let depMap = depsMap.get(key);
+  if(!depMap){
+     depMap.set(key,(depMap=new Set))
+  }
+  if(!depMap.has(activeEffect)){
+  	  depMap.add(activeEffect); 
+  }
+}
+
+/**
+ * track函数的数据解构
+ *  {name:'zs',age:20} 对应的effect: [effect1,,,,]  weakmap 进行存储
+ *    - name 对应的effect: [effect1,effect2,,,,] 可能有多个effect
+ *    - 或者是
+ * 
+ * weakmap
+ *   - key(obj)
+ *   - val(map)
+ *     - key
+ *     - val(set)
+ *       - key
+ *       - val
  */
 ```
+#### 手写trigger函数
+
+> 找属性对应的effect 让其执行 （数组、对象）
+
+
 
 #### Proxy使用案例
 
@@ -582,24 +685,7 @@ proxy.a = 'b';
 console.log(target.a);  //b
 ```
 
-#### 手写effect函数
 
-```js
-/*
- * 1、effect中所有属性，都会收集effect  （track函数）
- * 2、当这个属性值发生变化的时候，会重新执行effect （trigger函数）
- */
-let state = reactive({name:'zs',arr:[1,2,3]})
-effect(()=>{
-  app.innerHTML = state.arr;
-}) 
-setTimeOut(() => {
-  state.arr[100] = 1;
-},1000)
-
-trigger 函数 找属性对应的effect 让其执行 （数组、对象）
-
-```
 
 #### ref
 
@@ -642,7 +728,13 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
  */
 ```
 
+#### 组件创建流程
 
+#### 组件`render`函数调用关系
+
+```js
+每一个组件都有一个effect,vue3是组件级更新，数据变化会重新执行对应的effect
+```
 
 
 
@@ -845,8 +937,6 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
    console.log('result',res);// [1,2,6]
    ```
 
-   
-
 8. 
 
 ### vue
@@ -898,9 +988,18 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
    jsx 语法更加灵活，在编译的过程中，少了一些分析的功能
    ```
 
-   
+5. vue2中的update和vue3中的effect的区别
 
-5.  
+   ```js
+   update：是任何数据的变化都会重新执行
+   effect：只有state中依赖的属性和effect有关联，就会重新执行
+   let state = reactive({name:'zs',age:20,info:'xxx'})
+   effect(()=>{
+     app.innerHTML = `内容 ${state.name} ${state.age}`
+   })
+   ```
+
+6. vue3中的effect相当于vue2中的watcher
 
 ## 数据类型
 
@@ -1233,6 +1332,7 @@ export const patchProps = (el,key,prevValue,nextValue) => {
       }
   }
   
+  ```
 ```
 
 #### 虚拟dom的创建
@@ -1244,7 +1344,7 @@ export const patchProps = (el,key,prevValue,nextValue) => {
 
 * 将虚拟节点和容器获取到后调用render方法进行渲染
 
-```js
+​```js
 0b 表示二进制
      00000001 == 1*2^0
 		 00000011 == 1*2^1 + 1*2^0	
