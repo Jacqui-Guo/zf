@@ -17,3 +17,7 @@ export {
     toRef,
     toRefs
 } from './ref'
+
+export {
+    computed
+} from './computed'

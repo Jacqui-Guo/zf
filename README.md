@@ -754,6 +754,87 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
 每一个组件都有一个effect,vue3是组件级更新，数据变化会重新执行对应的effect
 ```
 
+#### `computed`
+
+**使用：**
+
+```js
+const age = ref(18);
+- computed 使用方式1
+const myAge = computed(() => {
+  return age.value + 10
+})
+- computed 使用方式2
+const myAge = computed({
+  get(){},
+  set(){}
+})
+
+⚠️ 注意：
+- computed 方法不会默认执行
+- 只有当访问 myAge.value (computed中值的时候) computed 才会执行
+- 但是当 myAge.value，myAge.value 多次访问，只要 myAge.value 中的数据没发生变化，就会调用缓存中的数据 
+- age.value = 100; // 更新age，myAge不会立刻重新计算
+- 只有当 myAge.value 取值的时候，才会再次重新计算最新值 
+```
+
+**函数封装：**
+
+```js
+class ComputedRefImpl {
+  public _dirty = true;
+  public effect;
+  public _value;
+  constructor(getter,public setter) {
+    this.effect = effect(getter,{
+      lazy: true
+    })
+  }
+  get value() {
+    if(this._dirty) {
+       this.effect = effect();
+    }
+    return this._value;
+  }
+
+  set value(newVal) {
+    this.setter(newVal);
+  }
+}
+
+export function computed(getterOrOptions) {
+  let getter;
+  let setter;
+  if(isFunction(getterOrOptions)) {
+     getter = getterOrOptions;
+     setter = () => {
+       console.warn('computed value must be readonly')
+     }
+  } else {
+    getter = getterOrOptions.get;
+    setter = getterOrOptions.set;
+  }
+  return new ComputedRefImpl(getter,setter);
+  // 因为访问computed中值是通过: computed.value 的形式，内部需要重新构建一个对象
+}
+```
+
+**实现思路：**
+
+```js
+1、computed 使用有两种方式，判断调用computed传递的参数是function,还是object
+2、访问computed中值是通过: computed.value 的形式，因此computed内部需要重新构建一个对象
+3、对computed中收集的属性，重新赋值，直接使用传递的setter函数
+4、getter获取数据：内部维护了一个effect，进行依赖收集与触发更新
+5、还需要考虑当在effect函数中，调用computed中值当情况
+   - 取值的过程中，让父级函数也可以收集到自己this： track(this,TrackOpTypes.GET,'value'); 
+6、当缓存的数据发生变化时
+   - 当父级函数中子属性更新了，除了更新子属性自己，还要通知父级函数收集的依赖进行更新 
+    trigger(this,TriggerOrTypes.SET,'value')
+```
+
+
+
 
 
 # JS高级
@@ -970,7 +1051,17 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
    ```
 
 
-2. vue2中不使用 `tree shacking` 的原因
+2. vue2 和 vue3 computed的原理是不一样的
+
+   ```js
+   /**
+    * vue2 中计算属性是不具有收集依赖的功能的
+    * vue3 中计算属性也要收集依赖
+    * 计算属性本身就是一个effect
+    */
+   ```
+   
+3. vue2中不使用 `tree shacking` 的原因
 
    ```js
    因为vue2中，不知道app对象中的哪些属性被调用了，发生了哪些变化，以及属性的类型也不好推断
@@ -986,7 +1077,7 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
    }
    ```
 
-3. Vue3 `tree shacking`
+4. Vue3 `tree shacking`
 
    ```js
    let a = 1;
@@ -997,7 +1088,7 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
    即用不到的代码 不进行打包
    ```
 
-4. vue3中 `template` 和 `jsx`
+5. vue3中 `template` 和 `jsx`
 
    ```js
    template 会做模版的静态分析	
@@ -1006,7 +1097,7 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
    jsx 语法更加灵活，在编译的过程中，少了一些分析的功能
    ```
 
-5. vue2中的update和vue3中的effect的区别
+6. vue2中的update和vue3中的effect的区别
 
    ```js
    update：是任何数据的变化都会重新执行
@@ -1017,9 +1108,9 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
    })
    ```
 
-6. vue3中的effect相当于vue2中的watcher
+7. vue3中的effect相当于vue2中的watcher
 
-7. `Vue3 模版编译流程`
+8. `Vue3 模版编译流程`
 
    * 先将模版进行分析，生成对应的ast树
      - `ast树就是使用对象来描述js语法的`
@@ -1028,7 +1119,7 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
    * 代码生成 
      * 使用 `codegen生成最终代码`
 
-8. `Vue3中Block, BlockTree`
+9. `Vue3中Block, BlockTree`
 
    > vue3重要变化：新增了blockTree,目的是收集动态节点
    >
@@ -1061,11 +1152,11 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
    两个儿子的全量比对  
    ```
 
-9. `patchFlags 对不同的节点进行描述`
+10. `patchFlags 对不同的节点进行描述`
 
    > 表示要比对哪些类型
 
-10. vue2与vue3的区别？
+11. vue2与vue3的区别？
 
     ```js
     * 性能优化
@@ -1076,7 +1167,7 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
       - 
     ```
 
-11. 
+12. 
 
 ## 数据类型
 

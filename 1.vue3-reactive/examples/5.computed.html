@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="../node_modules/@vue/reactivity/dist/reactivity.global.js"></script>
+    <script>
+        let { ref,computed } = VueReactivity;
+        const age = ref(18);
+        const myAge = computed(() => { // 此方法默认不会被执行
+            return age.value + 10;
+        })
+        debugger
+        console.log('xxxx',myAge,age);
+        // const myAge = computed({
+        //     get(){},
+        //     set(){}
+        // })
+
+        // 当访问属性的时候执行 
+        console.log(myAge.value)
+        //console.log(myAge.value)// 缓存
+        // 多次访问，只要 myAge.value 中的数据没发生变化，就会调用缓存中的数据 
+
+        // age.value = 100; // 更新age，myAge不会立刻重新计算
+        // 只有当 myAge.value 取值的时候，才会再次重新计算最新值 
+    </script>
+</body>
+</html>
