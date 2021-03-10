@@ -36,18 +36,28 @@ export const shallowReadonlyHandlers = extend({
 // 是不是仅读的，仅读的属性set时会报异常
 // 是不是深度的 
 function createGetter(isReadonly = false, shallow = false) { // 拦截获取功能
-    
     return function get(target, key, receiver) { // let proxy = reactive({obj:{}})
         // proxy + reflect
         // 后续Object上的方法 会被迁移到Reflect Reflect.getProptypeof()
         // 以前target[key] = value 方式设置值可能会失败 ， 并不会报异常 ，也没有返回值标识
         // Reflect 方法具备返回值
         // reflect 使用可以不使用 proxy es6语法
-       
+
         const res = Reflect.get(target, key, receiver); // target[key];
+        console.log('---',res);
         if(!isReadonly){
-            // 收集依赖，等会数据变化后更新对应的视图
+            // 收集依赖，等会数据变化后更新对应的视图  
             console.log('执行effect时会取值','收集effect')
+            
+            /**
+             *  let { effect, reactive } = VueReactivity;
+                let state = reactive({ name: 'zf', age: 12, arr:[1,2,3] })
+                effect(() => {
+                    console.log('render')
+                    app.innerHTML = state.name // 会取长度
+                })
+             */
+            
             track(target,TrackOpTypes.GET,key)
         }
         if(shallow){
@@ -64,6 +74,7 @@ function createSetter(shallow = false) { // 蓝爵设置功能
 
         const oldValue = target[key]; // 获取老的值
 
+        // 当前target是数组，并且修改的是数组的索引               
         let hadKey = isArray(target) && isIntegerKey(key) ? Number(key) < target.length : hasOwn(target,key);
 
         const result = Reflect.set(target, key, value, receiver); // target[key] = value

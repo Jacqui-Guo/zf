@@ -250,6 +250,12 @@ Promise.race([methods1,methods2,....]).then(data => {
    > defineProperty 会把一个对象进行完整的递归，完了给每个属性添加get和set
    >
    > Vue3 采用proxy, 它不需要改写属性的get, set 也不用一上来就递归，而是当使用到某一层的时候才进行处理
+   
+4. vue3 diff算法(可以根据patchFlag做diff),并且采用了最长递增子序列算法，vue2采用的是全量diff
+
+5. Fragment 可以支持多个根节点，
+
+6. vue2采用的是 `options api` vue3采用的是 `compositionApi` 
 
 ### 手写根据需要打包的信息进行 打包
 
@@ -448,9 +454,10 @@ Promise.race([methods1,methods2,....]).then(data => {
 
 #### 三种模式的区别
 
-* esm：说明是一个es6模块
-* cjs：cjs node模式
+* esm：说明是一个es6模块 `export default`
+* cjs：cjs node模式 `module.exports`
 * global：全局浏览器环境下引用的
+* Life: 立即
 
 #### 当执行`yarn install` 发生了什么
 
@@ -559,9 +566,10 @@ reactive/shallowReactive/readonly/shallowReadonly({name:'zs'})
 let state = reactive({name:'zs',arr:[1,2,3]})
 effect(()=>{
   app.innerHTML = state.arr;
+  state.name // 会执行 effect,track 函数 依赖收集
 }) 
 setTimeOut(() => {
-  state.arr[100] = 1;
+  state.arr[100] = 1;// 会执行trigger触发更新
 },1000)
 
 trigger 函数 找属性对应的effect 让其执行 （数组、对象）
@@ -641,7 +649,17 @@ export function track(target,type,key){
 
 > 找属性对应的effect 让其执行 （数组、对象）
 
+#### 分析总结
 
+1. ##### reactivity中包含的数据是怎么变成响应式的？
+
+   ```js
+   所谓的响应式就是reactivity中的数据发生变化,会触发页面中依赖reactivity数据的页面更新
+   let state = reactivity({name:'zs',age:20});
+   
+   ```
+
+2. ##### 当调用effect函数的时候发生了什么？
 
 #### Proxy使用案例
 
@@ -1001,6 +1019,65 @@ get 获取数据的时候，如果原对象是响应式的，就会进行依赖�
 
 6. vue3中的effect相当于vue2中的watcher
 
+7. `Vue3 模版编译流程`
+
+   * 先将模版进行分析，生成对应的ast树
+     - `ast树就是使用对象来描述js语法的`
+   * 做转换流程，`使用 transform 对动态节点做一些标记，如指令，插槽，事件，属性...`
+     * `标记：使用patchFlag进行标记`
+   * 代码生成 
+     * 使用 `codegen生成最终代码`
+
+8. `Vue3中Block, BlockTree`
+
+   > vue3重要变化：新增了blockTree,目的是收集动态节点
+   >
+   > block 是一个能够收集动态节点的节点
+
+   ```js
+   在vue2中，diff算法的特点是递归遍历
+   - 每次比较同一层，之前写的都是全量比对
+   - block的作用就是为了收集动态节点(它自己节点下面所有的)，将树的递归，拍平成了一个数组
+   - 在createVNode的时候，会判断这个节点是动态的，就让外层的block收集起来
+   - 目的是diff的时候，只diff动态的节点
+   ```
+
+   * `什么样的节点会被标记成block`
+
+     > 会影响解构的，v-if, v-else
+     >
+     > 父亲也会收集儿子的block, blockTree是有多个节点组成
+
+   ```js
+   改变结构的也要封装到block中，我们期望的更新方式，是拿以前的和现在的区别  **靶向更新**
+   如果前后节点个数不一致，那只能全部对比
+   
+   block --> div
+     block -> v-for 不收集动态节点了
+     
+   block -> div
+   	block -> v-for 不收集动态节点了
+     
+   两个儿子的全量比对  
+   ```
+
+9. `patchFlags 对不同的节点进行描述`
+
+   > 表示要比对哪些类型
+
+10. vue2与vue3的区别？
+
+    ```js
+    * 性能优化
+      - 每次重新渲染 都要使用createVNode这个方法，创建虚拟节点
+      - 静态提升  对静态节点进行提取
+      
+    * 事件缓存
+      - 
+    ```
+
+11. 
+
 ## 数据类型
 
 ### 常见的数据类型
@@ -1351,4 +1428,161 @@ export const patchProps = (el,key,prevValue,nextValue) => {
 1<<1 00000010 == 1*2^1 + 0*2^0 =》2
 1<<2 00000100 == 1*2^2 + 0*2^0
 ```
+
+## TS
+
+###  安装ts
+
+- npm install typescript -g
+- tsc --init 生成配置文件
+- 希望可以直接运行ts （测试）
+- code runner + npm install ts-node -g
+
+> 全局编译(将ts编译成js) , code runner 用node环境来执行ts
+
+### 构建工具来处理ts
+
+- webpack × 、 rollup √
+- 解析ts的方式 有两种：1, ts插件来解析 ，2,通过babel来解析
+- rollup 一般情况下会采用 rollup-plugin-typescript2
+- webpack ts-loader / babel-plugin-typescript
+
+### 解析ts的两种方式
+
+#### 1.全局编译TS文件(使用插件)
+
+全局安装`typescript`对`TS`进行编译`(使用node环境来执行ts)`
+
+```bash
+npm install typescript -g
+tsc --init # 生成tsconfig.json
+```
+
+```bash
+tsc # 可以将ts文件编译成js文件
+tsc --watch # 监控ts文件变化生成js文件
+```
+
+#### 2.使用`rollup`解析ts
+
+> 使用rollup解析文件： 一般情况下会采用 rollup-plugin-typescript2 + ts.config.js  就可以解析ts文件
+
+> 使用webpack解析文件：一般采用 ts-loader / babel-plugin-typescript
+
+- 安装依赖
+
+  - `rollup` 安装构建工具
+  - `rollup-plugin-typescript2`  让rollup可以识别typescript,类似于：rollup与ts之间的桥梁
+  - `@rollup/plugin-node-resolve` 在rollup中默认是不支持引入第三方插件的，所以需要安装当前插件
+  - `rollup-plugin-serve` 起一个服务，看rollup运行的结果
+
+  ```bash
+  npm install rollup typescript rollup-plugin-typescript2 @rollup/plugin-node-resolve rollup-plugin-serve -D
+  ```
+
+- 初始化`TS`配置文件
+
+  ```bash
+  npx tsc --init
+  ```
+
+- `webpack`配置操作
+
+  ```js
+  // rollup.config.js
+  import ts from 'rollup-plugin-typescript2'; // rollup和ts的桥梁
+  import {nodeResolve} from '@rollup/plugin-node-resolve'; // 解析node第三方模块
+  import serve from 'rollup-plugin-serve';
+  import path from 'path'
+  export default {
+      input:'src/index.ts',
+      output:{
+          format:'iife', // 立即执行函数,自执行函数
+          file:path.resolve(__dirname,'dist/bundle.js'), 
+          sourcemap:true // 源码映射文件，方便代码调试
+      },
+      plugins:[
+          nodeResolve({ // 先解析第三方插件,解析的后缀名
+              extensions:['.js','.ts'] // 默认解析js，如果js找不到就解析ts
+          }),
+          ts({
+              tsconfig:path.resolve(__dirname,'tsconfig.json')
+          }),
+          serve({
+              open:true,
+              openPage:'/public/index.html', // 启动端口之后默认打开的配置文件
+              port:3000,
+              contentBase:'' // 起的服务是以根目录为基准
+          })
+      ]
+  }
+  ```
+
+- `package.json`配置
+
+  ```json
+  "scripts": {
+        "dev": "rollup -c -w"
+  }
+  ```
+
+> 我们可以通过`npm run dev`启动服务来使用typescript啦~
+
+### ts中 `null,undefined` 介绍
+
+```js
+- null,undefined 是任何类型的子类型，
+但是当tsconfig.json中配置了 strict:true,
+也就是说，在严格模式下，null,undefined是其它类型的子类型是会报错的
+
+- 严格模式下不能把 null 赋值给 void
+```
+
+### TS中的数据类型
+
+#### 枚举
+
+```js
+const enum ROLE{
+  ADMIN,
+  MAMAGE,
+  USER
+}
+
+如果不加 const 打包之后生成js,会是对象的形式，
+一般情况下不需要用 反举 都添加 const
+
+- 枚举可以支持反举，但是限于索引，会根据上一个人的值，进行自动推断
+
+const enum ROLE{
+  ADMIN,
+  MAMAGE=5,
+  USER
+}
+ROLE.USER = 6 // 会根据上一个的值，进行自动推断
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

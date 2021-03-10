@@ -13,15 +13,23 @@ let uid = 0;
 let activeEffect; // 存储当前的effect
 const effectStack = []
 function createReactiveEffect(fn, options) {
-    
     const effect = function reactiveEffect() {
+        // 放到栈中，主要是为了避免下面的骚操作
+        /**
+         * effect(()=>{
+         *  state.name;
+         *  effect(() => {state.age})
+         *  state.info; 
+         * })
+         */
         if (!effectStack.includes(effect)) { // 保证effect没有加入到effectStack中
             try {
                 effectStack.push(effect);
                 activeEffect = effect;
                 return fn(); // 函数执行时会取值  会执行get方法
+                // fn() 会执行 =》 baseHandlers -> createGetter/createSetter方法
             } finally {
-                effectStack.pop();
+                effectStack.pop(); // 删除数组的最后一个元素
                 activeEffect = effectStack[effectStack.length - 1];
             }
         }
@@ -36,7 +44,6 @@ function createReactiveEffect(fn, options) {
 const targetMap = new WeakMap();
 export function track(target, type, key) { // 可以拿到当前的effect
     //  activeEffect; // 当前正在运行的effect
-   
     if (activeEffect === undefined) { // 此属性不用收集依赖，因为没在effect中使用
         return;
     }
@@ -52,10 +59,30 @@ export function track(target, type, key) { // 可以拿到当前的effect
         dep.add(activeEffect);
     }
 }
+/**
+ * track函数的数据解构
+ *  {name:'zs',age:20} 对应的effect: [effect1,,,,]  weakmap 进行存储
+ *    - name 对应的effect: [effect1,effect2,,,,] 可能有多个effect
+ *    - 或者是
+ * 
+ * weakmap
+ *   - key(obj)
+ *   - val(map)
+ *     - key
+ *     - val(set)
+ *       - key
+ *       - val
+ * 
+ * 使用weakmap去存储数据，weakmap的 key=> {name:'zs',age:20}
+ *                     weakmap的 value=> map对象  
+ */
+
 
 // 找属性对应的effect 让其执行 （数组、对象）
+// type记录是添加还是修改，
 export function trigger(target, type, key?, newValue?, oldValue?) {
-
+    // debugger
+    console.log('trigger');
     // 如果这个属性没有 收集过effect，那不需要做任何操作
     const depsMap = targetMap.get(target);
     if (!depsMap) return;
@@ -89,13 +116,7 @@ export function trigger(target, type, key?, newValue?, oldValue?) {
                 }
         }
     }
-    effects.forEach((effect: any) => {
-        if(effect.options.scheduler){
-            effect.options.scheduler(effect);
-        }else{
-            effect();
-        }
-    })
+    effects.forEach((effect: any) => effect())
 }
 // weakMap {name:'zf',age:12}  (map) =>{name => set(effect),age => set(effect)}
 // {name:'zf',age:12} => name => [effect effect]

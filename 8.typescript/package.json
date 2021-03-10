@@ -1,0 +1,19 @@
+{
+  "name": "8.typescript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "rollup.config.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "rollup": "^2.40.0",
+    "rollup-plugin-serve": "^1.1.0",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "typescript": "^4.2.3"
+  },
+  "scripts": {
+    "dev": "rollup -c -w"
+  },
+  "author": "",
+  "license": "ISC"
+}

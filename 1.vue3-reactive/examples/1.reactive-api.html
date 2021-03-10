@@ -12,8 +12,11 @@
     <script src="../node_modules/@vue/reactivity/dist/reactivity.global.js"></script>
     <script>
         let { reactive, shallowReactive, readonly, shallowReadonly } = VueReactivity
-        let state = reactive({ name: 'zf', age: { n: 12 } })
+        // let state = shallowReadonly({ name: 'zf', age: { n: 12 } })
         // state.age.n = 100;
+        // console.log()
+        let state = reactive({ name: 'zf', age: { n: 12 } })
+        
         console.log(state.name)
     </script>
 </body>
