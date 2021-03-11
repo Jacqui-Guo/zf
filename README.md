@@ -833,6 +833,8 @@ export function computed(getterOrOptions) {
     trigger(this,TriggerOrTypes.SET,'value')
 ```
 
+### createApp
+
 
 
 
