@@ -54,6 +54,10 @@ Array.prototype.forEach = function(fn) {
 ##### set
 
 > 值不重复
+>
+> 向 Set 加入值的时候，不会发生类型转换，所以`5`和`"5"`是两个不同的值
+>
+> Set 内部判断两个值是否不同,使用的是 ===
 
 ```js
 let arr = [1,2,3,4,2,8];
@@ -61,8 +65,6 @@ let set = new Set(arr); // 得到一个set集合
 console.log([...set]); // [1, 2, 3, 4, 8]   
 
 ```
-
-
 
 ##### map
 
@@ -85,6 +87,12 @@ let newArr = [1,2,3].map((value,index,ary) => {
 })
 console.log(newArr); // [2,4,6]
 ```
+
+set 类似于数组，一般用于数组去重
+
+Map  本质上是建值对的集合，类似于集合，具有极快的查找速度
+
+
 
 ##### filter
 
@@ -1169,7 +1177,22 @@ export function computed(getterOrOptions) {
       - 
     ```
 
-12. 
+12. `Props`与`attrs` 的区别
+
+    ```js
+    /**
+     * props与attrs有什么区别？
+     *   - <my-component a=1 b=2></my-component>
+     *     + a,b 是attr,属性
+     *     + 接收组件传递过来的数据 { // 这个是props
+     *                              props:['a']
+     *                           }
+     */
+    ```
+
+    
+
+13. 
 
 ## 数据类型
 
@@ -1351,13 +1374,79 @@ console.log(obj2 + ""); // "true"  -- hint 参数值是 "default"
 #### runtime-dom
 
 > 是为了解决浏览器平台差异（浏览器的）
+>
+> 核心就是提供domApi方法的
 
 1. 生成配置文件 -》配置配置文件
-2. 
+2. `处理dom节点操作(增删改查)，属性操作(增删改查)，样式，类，事件，其他属性`
+3. `createApp` 创建应用
+   1. 容器挂载之前需要先清空容器
+   2. 将组件渲染成dom元素，进行挂载 `createRender`
+      * **createRender 目的是创建一个渲染器**，`将哪个人，渲染到哪个容器上`
+
+##### 创建虚拟节点
+
+```js
+1、创建虚拟节点，就是使用一个 {} 用来模拟节点
+2、{} 中需要包含当前自己节点是什么类型 shapeFlag
+3、{} 需要包含 key ，因为diff算法会用到
+```
+
+```js
+// 根据组件创建虚拟节点
+
+import { isArray, isObject, isString } from "@vue/shared/src";
+import { ShapeFlags } from "packages/shared/src/shapeFlag";
+
+// h('div',{style:{color:red}},'children') h方法与createApp方法类似
+export const createVNode = (type,props,children = null) => {
+    // createVNode 接受的第一个参数有两种：1，component 2,传入的值可能是普通元素
+    // 给虚拟节点加一个类型
+    const shapeFlag = isString(type) ? 
+        ShapeFlags.ELEMENT : isObject(type) ? 
+        ShapeFlags.STATEFUL_COMPONENT : 0;
+
+    // 根据type来区分是组件(对象)，还是普通元素(字符串)
+    const vnode = { // 创建一个对象来描述对应的内容，虚拟节点有跨平台的能力
+        __v_isVnode: true,
+        type,
+        props,
+        children,
+        el:null, // 稍后会将虚拟节点和真实节点对应起来
+        key: props && props.key, // diff算法会用到key
+        shapeFlag 
+    }
+    // 判断出当前自己的类型和儿子的类型
+    normalizeChildren(vnode,children);
+    return vnode;
+}
+
+function normalizeChildren(vnode,children) {
+    let type = 0;
+    if(children === null) {
+
+    } else if(isArray(children)) {
+        type = ShapeFlags.ARRAY_CHILDREN
+    } else {
+        type = ShapeFlags.TEXT_CHILDREN
+    }
+    vnode.shapeFlag = vnode.shapeFlag | type; // 自己与儿子的类型取 ｜ 运算
+    /**
+     * 为什么要拿自己和自己儿子的类型取 ｜ 运算？
+     *   因为得出的结果包含 自己是什么类型，自己的儿子是什么类型
+    */ 
+}
+```
+
+##### 创建render
+
+> 将虚拟节点和容器获取到后调用render方法进行渲染
 
 #### runtime-core
 
 > runtime-core 与平台无关，不需要打包成cjs,或者global
+>
+> `使用 runtime-dom 中的 api 进行渲染	`
 
 #### patchProps
 
@@ -1447,11 +1536,14 @@ export const patchProps = (el,key,prevValue,nextValue) => {
   // el: 要绑定事件的元素， key：给元素绑定事件的名称，value：给元素绑定的事件      
   export const patchEvent = (el,key,value) => {
      // 给元素绑定一个缓存事件的列表
+    
+    let i ={name:fn}; exist = i[name] => fn
+    
      const invoker = (el._vei || (el._vei = {}));
      const exist = invoker[key];
      const eventName = key.slice(2).toLowerCase(); // onClick => click 
       if(value && exist) { // value 值存在，并且对象里面已经存在该事件对应的函数
-         exist[key] = value;
+         exist.value = value;
       } else {
           if(value) { // value值存在 （要绑定事件，以前没有绑过）
              let invoker = exist[key] = createInvoker(value); // (value) => {value()} 
@@ -1658,6 +1750,15 @@ ROLE.USER = 6 // 会根据上一个的值，进行自动推断
 
 
 
+
+```js
+1、可以用接口来描述实例
+泛型的用处在于，当我们调用的时候，确定类型，而不是一开始就写好的，类型不确定，只有在执行的时候才确定
+
+
+const createArray
+
+```
 
 
 

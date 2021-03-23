@@ -1,3 +1,4 @@
-export default {
-    b: 2
-}
+export {
+    createRender
+} from './renderer'
+

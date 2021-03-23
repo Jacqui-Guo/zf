@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // vue 是如何进行依赖收集的
+        // 在vue3中新增了，reactive ,effect api
+
+        // 1、reactive api会将一个对象变成响应式的
+        // 2、effect 中所有使用的属性，都会进行依赖收集 使用track 函数(所谓的依赖收集就是收集每个属性对应的effect)
+        // 3、当 effect 中使用当属性发生变化当时候会重新执行 effect 函数，使用trigger函数进行触发更新
+        // effect(() => {
+        //     state.name
+        // })
+        // let state = reactive({name:'gjj',age:20});
+
+        // function effect(fn,options = {}) {
+        //     const effect = createReactiveEffect(fn,options);
+
+        //     // effect函数被调用的时候，默认会先执行一次
+        //     if(!options.lazy) { 
+        //         effect();
+        //     }
+        //     return effect;
+        // } 
+
+        // // 创建一个effectStack栈，用于存储每个属性对应的effect
+        // // 定义一个变量 activeEffect 用于存储当前正在执行的effect, 用于触发更新
+        // let activeEffect;
+        // let effectStack = []; // 栈，存储每个属性对应的effect
+        // const createReactiveEffect = (fn,options) => {
+        //     const effect = function reactiveEffect() {
+        //         try {
+        //             if(!effectStack.includes(effect)) {
+        //                 effectStack.push(effect)
+        //                 activeEffect = effect;
+        //                 return fn();
+        //             }
+        //         } finally {
+        //             effectStack.pop(); // 执行完之后，释放当前属性的effect
+        //             activeEffect = effectStack[effectStack.length - 1];
+        //         }
+        //     }
+        //     return effect;
+        // }
+
+        // // track 函数进行依赖收集
+        // const targetMap = new WeakMap();
+        // function track(target,type,key){ 
+        //     if(activEffect === undefined) return;
+            
+        //     let depsMap = targetMap.get(target);
+        //     if(!depsMap){
+        //         depsMap.set(target,(depsMap=new map))
+        //     }
+        //     let depMap = depsMap.get(key);
+        //     if(!depMap){
+        //         depMap.set(key,(depMap=new Set))
+        //     }
+        //     if(!depMap.has(activeEffect)){
+        //         depMap.add(activeEffect); 
+        //     }
+        // }
+
+//         题目描述:
+//             给定一个经过编码的字符串，返回它解码后的字符串。
+//             编码规则为: k[encoded_string]，表示其中方括号内部的 encoded_string 正好重复 k 次。注意 k 保证为正整数。
+//             你可以认为输入字符串总是有效的；输入字符串中没有额外的空格，且输入的方括号总是符合格式要求的。
+//             此外，你可以认为原始数据不包含数字，所有的数字只表示重复的次数 k ，例如不会出现像 3a 或 2[4] 的输入。
+
+//         示例 1：
+//             输入：s = "3[a]2[bc]"
+//             输出："aaabcbc"
+
+
+//         示例 2：
+//             输入：s = "3[a2[c]]"
+//             输出："accaccacc"
+
+
+//         示例 3：
+//             输入：s = "2[abc]3[cd]ef"
+//             输出："abcabccdcdcdef"
+
+
+//         示例 4：
+//             输入：s = "abc3[cd]xyz"
+//             输出："abccdcdcdxyz"
+
+const decodeString = function (s) {
+    
+}
+
+
+
+
+    </script>
+</body>
+</html>
