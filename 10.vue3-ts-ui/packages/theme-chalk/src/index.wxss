@@ -799,3 +799,117 @@
   background-color: #E6A23C;
   border-color: #E6A23C;
 }
+
+.z-button-group > .z-button:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0px;
+}
+
+.z-button-group > .z-button:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0px;
+}
+
+.z-row {
+  display: flex;
+}
+
+.z-col {
+  background: #000;
+}
+
+.z-col.z-col-span-1 {
+  flex: 4.16667%;
+}
+
+.z-col.z-col-span-2 {
+  flex: 8.33333%;
+}
+
+.z-col.z-col-span-3 {
+  flex: 12.5%;
+}
+
+.z-col.z-col-span-4 {
+  flex: 16.66667%;
+}
+
+.z-col.z-col-span-5 {
+  flex: 20.83333%;
+}
+
+.z-col.z-col-span-6 {
+  flex: 25%;
+}
+
+.z-col.z-col-span-7 {
+  flex: 29.16667%;
+}
+
+.z-col.z-col-span-8 {
+  flex: 33.33333%;
+}
+
+.z-col.z-col-span-9 {
+  flex: 37.5%;
+}
+
+.z-col.z-col-span-10 {
+  flex: 41.66667%;
+}
+
+.z-col.z-col-span-11 {
+  flex: 45.83333%;
+}
+
+.z-col.z-col-span-12 {
+  flex: 50%;
+}
+
+.z-col.z-col-span-13 {
+  flex: 54.16667%;
+}
+
+.z-col.z-col-span-14 {
+  flex: 58.33333%;
+}
+
+.z-col.z-col-span-15 {
+  flex: 62.5%;
+}
+
+.z-col.z-col-span-16 {
+  flex: 66.66667%;
+}
+
+.z-col.z-col-span-17 {
+  flex: 70.83333%;
+}
+
+.z-col.z-col-span-18 {
+  flex: 75%;
+}
+
+.z-col.z-col-span-19 {
+  flex: 79.16667%;
+}
+
+.z-col.z-col-span-20 {
+  flex: 83.33333%;
+}
+
+.z-col.z-col-span-21 {
+  flex: 87.5%;
+}
+
+.z-col.z-col-span-22 {
+  flex: 91.66667%;
+}
+
+.z-col.z-col-span-23 {
+  flex: 95.83333%;
+}
+
+.z-col.z-col-span-24 {
+  flex: 100%;
+}
