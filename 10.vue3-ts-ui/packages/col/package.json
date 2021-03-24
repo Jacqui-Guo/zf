@@ -1,0 +1,26 @@
+{
+  "name": "@z-ui/col",
+  "version": "0.0.0",
+  "description": "> TODO: description",
+  "author": "guojj <guojj@m3joy.com>",
+  "homepage": "https://github.com/Jacqui-Guo/zf#readme",
+  "license": "ISC",
+  "main": "lib/col.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jacqui-Guo/zf.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/Jacqui-Guo/zf/issues"
+  }
+}

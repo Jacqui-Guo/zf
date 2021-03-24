@@ -1,0 +1,15 @@
+@import './common/var.scss';
+@import './mixins/mixin';
+
+@include b(button-group){
+    &>.#{$namespace}-button{
+        &:first-child {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0px;
+        }
+        &:last-child {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0px;
+        }
+    }
+}

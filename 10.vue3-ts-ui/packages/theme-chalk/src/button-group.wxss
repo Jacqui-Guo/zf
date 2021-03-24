@@ -1,0 +1,9 @@
+.z-button-group > .z-button:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0px;
+}
+
+.z-button-group > .z-button:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0px;
+}

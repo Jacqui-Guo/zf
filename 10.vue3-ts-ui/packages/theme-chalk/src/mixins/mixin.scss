@@ -23,6 +23,23 @@
         }
     }
 }
+// @at-root 不参与嵌套，直接跳出嵌套
+// .parent{
+//     color:red;
+//     @at-root .child {
+//         width:200px;
+//         height:50px;
+//     }
+// }
+// 编译后
+// .parent {
+// color: red;
+// }
+// .child {
+// width: 200px;
+// height: 50px; 
+// }
+
 // &__header  => .z-button__header
 @mixin e($element) {
     @at-root {
@@ -30,4 +47,10 @@
             @content;
         }
     }
+}
+
+@mixin  button-type($color,$bg-color,$border-color) {
+    color: $color;
+    background-color: $bg-color;
+    border-color: $border-color;
 }

@@ -1,0 +1,54 @@
+@import './common/var.scss';
+@import './mixins/mixin';
+@include b(button) { // z-button
+    display: inline-block;
+    min-height: 40px;
+    outline: none;
+    border: #f00;
+    user-select: none;
+    padding: 0 15px;
+    border-radius: 5px;
+
+    // [attr*=value] 匹配属性值中包含指定值的每个元素[多个]
+    // [attr^=value] 匹配属性值以指定值开头的每个元素
+    // [attr$=value] 匹配属性值以指定值结尾的每个元素
+    // [attr~=value] 用于选取属性值中包含指定词汇的元素(单个)
+
+    & [class*="z-icon-"] {
+        vertical-align: middle;
+      & + span {
+          margin-left: 5px;
+      }  
+    }
+
+    @include when(disabled) {
+        cursor: not-allowed;
+    }
+
+    @include when(loading) {
+        // pointer-events: none; // 按钮不能被点击
+    } 
+    @include when(round) {
+        border-radius: 20px;
+    } 
+
+    @include m(primary) {
+        @include button-type($--color-white,$--color-primary,$--color-primary)
+    }
+
+    @include m(success) {
+        @include button-type($--color-white,$--color-success,$--color-success)
+    }
+
+    @include m(info) {
+        @include button-type($--color-white,$--color-info,$--color-info)
+    }
+
+    @include m(danger) {
+        @include button-type($--color-white,$--color-danger,$--color-danger)
+    }
+
+    @include m(warning) {
+        @include button-type($--color-white,$--color-warning,$--color-warning)
+    }
+}

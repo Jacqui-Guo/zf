@@ -6,7 +6,7 @@ import ZUI from 'z-ui'
 
 // import Button from '../lib/button/index'
 // import Icon from '../lib/icon/index'
-// import 'theme-chalk/src/index.scss'
+import 'theme-chalk/src/index.scss'
 // 创建应用 并使用组件库
 
 
