@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- button & icon -->
     <z-button type="danger" loading @click="buttonClick"></z-button>
     <z-button icon="z-icon-menu" type="danger">danger</z-button>
     <z-button icon="z-icon-loading" disabled="true" round="true"
@@ -15,6 +16,7 @@
       </z-button>
     </z-button-group>
 
+    <!-- row & col  -->
     <z-row tag="div">
       <z-col :span="6">
         <div style="background: red">11</div>
@@ -48,6 +50,12 @@
         <div style="background: #ff0">33</div>
       </z-col>
     </z-row>
+
+    <!-- checkbox & checkbox-group -->
+    <z-checkbox>
+      checkbox
+    </z-checkbox>
+    <z-checkbox-group></z-checkbox-group>
   </div>
 </template>
 <script>
