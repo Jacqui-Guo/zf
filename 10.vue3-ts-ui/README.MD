@@ -14,5 +14,29 @@ lerna create checkbox-group
 checkbox/src/checkbox.vue & checkbox-group.vue
 
 1. checkbox.vue
+   <template>
+      <div class="z-checkbox">
+         
+      </div>
+   </template>
    name: 'ZCheckbox'
+   props: {
+      name: String,
+      indeterminate: Boolean,
+      checked: Boolean,
+      label: [String,Number,Boolean],
+      ...
+   }
+   setup(props,{slots}) {
+      props.modelValue
+   }
 
+2. checkbox/src/checkbox-types.ts 存储类型的文件
+   export interface ICheckboxProps {
+       indeterminate?: Boolean, // 是否半选
+       checked?: Boolean, // 是否选中
+       name?:string,
+       disabled?:  Boolean,
+       label?: string | number | boolean, // 选中状态的值
+       modelValue?: string | number, // 绑定checkbox的值
+   }
