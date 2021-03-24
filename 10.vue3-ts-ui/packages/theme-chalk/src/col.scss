@@ -1,0 +1,17 @@
+@import './common/var.scss';
+@import './mixins/mixin';
+
+@include b(col) {
+    box-sizing: border-box;
+    @for $i from 1 through 24 {
+        &.z-col-span-#{$i} {
+            max-width: (1/24 * $i * 100) * 1%;
+            flex: (1/24 * $i * 100) * 1%; // 计算出百分之多少
+        }
+        &.z-col-offset-#{$i} {
+            margin-left: (1/24 * $i * 100) * 1%; // 计算出百分之多少
+        }
+    }
+}
+
+// 生成24中写法，span=1,2,3,... BEM规范

@@ -6,40 +6,13 @@
 
 响应式布局的原理：栅格化布局
 
-1. lerna create col 
-2. lerna create row
+代码发布流程：lerna publish 发布，需要先将代码提交到github
 
+lerna create checkbox 
+lerna create checkbox-group 
 
-col/row.ts & col.ts & index.ts
-row/index.ts
+checkbox/src/checkbox.vue & checkbox-group.vue
 
-3. col.ts
-import {defineComponent} from 'vue
+1. checkbox.vue
+   name: 'ZCheckbox'
 
-name: "Col"
-props: {
-    tag: {
-        type: String,
-        default: 'div'
-    }
-},
-setup(){
-    // 标签名，属性，插槽(slots.default?.() ts 的写法，如果 slots.default存在就调用，不存在 就 ())
-    return () => h(props.tag,{},slots.default?.())
-}
-
-row.ts 同上
-
-4. col/index.ts
-
-import Col from './src/col'
-Col.install = (app:App):void => {
-    app.component(Col.name,Col)
-}
-export default Col
-
-row/index.ts 同上
-
-5. z-ui 中 去注册
-6. lerna publish 发布，需要先将代码提交到github
-7. 
