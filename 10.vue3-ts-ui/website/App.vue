@@ -52,14 +52,15 @@
     </z-row>
 
     <!-- checkbox & checkbox-group -->
-    <z-checkbox>
+    {{checkVal}}
+    <z-checkbox v-model="checkVal" @change="checkboxChange" disabled>
       checkbox
     </z-checkbox>
     <z-checkbox-group></z-checkbox-group>
   </div>
 </template>
 <script>
-import { defineComponent } from "vue";
+import { defineComponent,ref } from "vue";
 const useButton = () => {
   const buttonClick = () => {
     console.log("handle-click");
@@ -70,10 +71,23 @@ const useButton = () => {
   };
 };
 
+const useCheckBox = () => {
+  const checkVal = ref(true); // 将true变成 {value: true} 响应式的
+  
+  const checkboxChange = (e) => {
+    console.log('change',e);
+  }
+  return {
+    checkVal,
+    checkboxChange
+  }
+}
+
 export default defineComponent({
   setup() {
     return {
       ...useButton(),
+      ...useCheckBox()
     };
   },
 });
