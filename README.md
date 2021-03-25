@@ -1764,6 +1764,12 @@ const createArray
 
 
 
+## 手写Z-UI组件
+
+### checkbox 
+
+1. `lerna create checkbox`
+2. 
 
 
 
@@ -1777,6 +1783,8 @@ const createArray
 
 
 
-
-
-
+1. yarn init -y
+2. 修改packages.json配置文件
+3. compiler-dom/src/index.ts
+4. yarn install 生成软链
+5. 

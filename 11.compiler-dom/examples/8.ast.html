@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="../node_modules/@vue/compiler-dom/dist/compiler-dom.global.js"></script>
+    <div id="app"></div>
+    <script>
+        // vue3将模版转化成render函数
+        // 1、把html解析成抽象语法树 ast
+        // 2、转化ast树 加标记和进行优化
+        // 3、生成render函数，
+        
+        let {baseCompiler} = VueCompilerDom
+
+        let ast = baseCompiler("hello");
+        // let ast = baseCompiler(`{{NAME}}`);
+
+        // 解析表达式
+
+        console.log(ast);
+    </script>
+</body>
+</html>
