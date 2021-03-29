@@ -1,14 +1,6 @@
-import { getCursor, parseTextData } from "./common";
+import { getCursor, parseTextData,getSelection } from "./common";
 import { NodeTypes } from "./NodeTypes";
 
-const getSelection = (content,start) => {
-    let {line,column,offset,source} = content;
-    return {
-        start: {...start},
-        end: {line,column,offset},
-        source
-    }
-}
 
 export const parseText = (content) => {
     const endTokens = ['<','{{'];

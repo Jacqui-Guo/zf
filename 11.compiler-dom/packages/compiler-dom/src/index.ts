@@ -12,8 +12,8 @@ const parseChildren = (content) => {
     const nodes = [];
     console.log(isEnd(content));
     // 解析完毕的核心就是判断 content.source = ''
-    // while(!isEnd(content)) {
-    //     // 解析的内容可能是 < 标签，abc.. 文本, {{xxx}} 表达式
+    while(!isEnd(content)) {
+        // 解析的内容可能是 < 标签，abc.. 文本, {{xxx}} 表达式
         const s = content.source;
         let node;
         if(s[0] == '<') { // 标签
@@ -25,7 +25,7 @@ const parseChildren = (content) => {
             console.log('文本解析',node);
         }
         nodes.push(node);
-    // }
+    }
 
     return nodes;    
 }
@@ -53,3 +53,4 @@ export const baseCompiler = (template) => {
     const ast = baseParse(template);
     return ast;
 }
+

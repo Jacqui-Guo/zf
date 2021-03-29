@@ -1788,3 +1788,290 @@ const createArray
 3. compiler-dom/src/index.ts
 4. yarn install 生成软链
 5. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## ast
+
+将模版转换成抽象语法树
+
+
+
+
+
+
+## 垃圾回收机制
+* 内存泄漏 =》 不再用到的内容，没有及时释放掉
+
+
+
+
+
+# Node
+
+#### 函数
+
+##### 高阶函数：
+
+```js
+一个函数返回一个函数
+一个函数的参数，可以接收一个函数
+满足上面条件的任一均可
+```
+
+**代码**
+
+```js
+function core(...args) {
+    console.log('我是core函数',args)
+}
+
+Function.prototype.before = function(cb) {
+    // 在这里 谁调用的 before 函数，this 指向的就是谁
+    return (...args) => { // 作为函数参数 称为剩余运算法
+       cb();
+       this(...args); // 调用函数时传递的参数，称为拓展运算符
+   }
+}
+
+let newCore = core.before(()=>{
+    console.log(123);
+})
+
+newCore('hello','world');
+```
+
+##### 闭包定义？
+
+```js
+一个函数定义的作用域和执行的作用域不再同一个，肯定会出现闭包 
+```
+
+##### 函数柯里化
+
+```js
+柯里化参数要求，函数的参数一个一个的传入
+```
+
+**代码**
+
+```js
+function curring(cb) {
+  // cb.length 对应的是 cb 函数，参数的个数
+  // 存储每次调用时传入的变量
+  const inner = (args = []) => {
+    return args.length >= cb.length ? cb(...args) : (...userArgs) => inner([...args, ...userArgs])
+  }
+  return inner();
+}
+
+function sum(a, b, c, d) {
+  return a + b + c + d;
+}
+let sum1 = curring(sum);
+let sum2 = sum1(1);
+let sum3 = sum2(2, 3);
+let res = sum3(4);
+
+console.log(res); 
+
+
+function isType(typing,val){
+  return Object.prototype.toString.call(val) == `[object ${typing}]`;
+} 
+
+
+let util = {};
+['String','Number','Boolean','Null','Undefined'].forEach(type => {
+  util[`is${type}`] = curring(isType)(type)
+})
+
+console.log(util.isString('123')); // true
+```
+
+##### 发布订阅
+
+`定义`
+
+> 发布订阅模式，核心就是把多个方法先暂存起来，最后一次执行
+
+`代码`
+
+```js
+const fs = require('fs');
+
+const events = {
+    _events: [],
+    on(fn) { // 订阅
+        this._events.push(fn);
+    },
+    emit(data){ // 发布
+        this._events.forEach(fn => {
+            fn(data)
+        })
+    }
+}
+
+// 订阅是有顺序的，可以采用数组来控制
+
+let data = [];
+// 每读取一次数据，就订阅一次
+events.on((_data) =>{
+    console.log('每读取一次，就触发一次');
+    data.push(_data)
+    if(data.length === 2) {
+        console.log('读取完成',data);
+        return;
+    }
+})
+
+
+fs.readFile('./a.txt','utf8',(err,data) =>{
+    events.emit(data) // 发布
+})
+
+fs.readFile('./b.txt','utf8',(err,data) =>{
+    events.emit(data)
+})
+
+
+// 观察者模式： 其内部实现是基于发布订阅的(发布订阅之间是没有依赖关系的)
+
+```
+
+##### 观察者模式
+
+`观察者模式相对发布订阅模式来讲，多了观察者`
+
+`定义`
+
+> 通俗的讲：就是 当前我的状态变化了，通知依赖当前状态的人，去更新状态
+>
+> vue 数据变了(状态变了)，视图要更新(通知依赖的人)
+
+被观察者需要将观察者收集起来**(订阅)**
+
+当被观察者状态发生变化，通知观察者去更新状态**(发布)**
+
+`代码`
+
+```js
+
+// 被观察者的类
+class Subject{
+    constructor(name) {
+        this.name = name;
+        this.state = '哈哈哈';
+        this.observer = [];
+    }
+
+    attch(o) {
+        this.observer.push(o) // 订阅
+    }
+
+    setState(newState) {
+        this.observer.forEach(o => {
+            o.update(newState,this.name) // 被观察者去 发布
+        })
+    }
+}
+
+// 观察者的类
+class Observer {
+    constructor(name) {
+        this.name = name;
+    }
+    update(state,_name){
+        console.log(`${_name}说：${this.name} ${state}`)
+    }
+}
+
+let baby = new Subject('宝宝')
+
+let o1 = new Observer('father')
+let o2 = new Observer('mother')
+
+// 订阅(被观察者将观察者收集起来)
+baby.attch(o1)
+baby.attch(o2)
+
+// 发布
+baby.setState('我饿了')
+
+宝宝说：father 我饿了
+宝宝说：mother 我饿了
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

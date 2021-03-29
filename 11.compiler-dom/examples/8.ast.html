@@ -16,12 +16,19 @@
         
         let {baseCompiler} = VueCompilerDom
 
-        let ast = baseCompiler("hello");
-        // let ast = baseCompiler(`{{NAME}}`);
+        // let ast = baseCompiler("hello");
+        let ast = baseCompiler(`{{ NAME }}`);
 
-        // 解析表达式
 
-        console.log(ast);
+
+        // 表达式的处理
+        // 1、先计算整个表达式的行，列，偏移量
+        //   1.1. 获取“  NAME ”
+        //   1.2. 计算 从开头到 N 的行，列，偏移量
+        //   1.3. 计算 从开头到 E 的行，列，偏移量 
+
+        // 表达式的处理
+        // 1. 解析标签名
     </script>
 </body>
 </html>

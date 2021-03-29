@@ -15,7 +15,7 @@ export const advanceBy = (content,endIndex) => {
 }
 
 // 更新 行，列，偏移量
-const advancePositionWithMutation = (content,s,endIndex) => {
+export const advancePositionWithMutation = (content,s,endIndex) => {
     // s 之前的内容
 
     // 如何更新是第几行？
@@ -23,11 +23,13 @@ const advancePositionWithMutation = (content,s,endIndex) => {
     let linePos = -1; // 列的位置
     for(let i = 0;i<endIndex;i++) {
         // charCodeAt 获取字符的 unicode 编码 \n 对应的unicode编码为10
-       if(s.charCodeAt(i) == 10) { // 遇到 \n 符号
-          linesCount++;  
-          linePos=i;
-       }
+        if(s && s.charCodeAt(i) == 10) { // 遇到 \n 符号
+            linesCount++;  
+            linePos=i;
+        }
     }
+    debugger
+    
     // 更新列数
     // 更新偏移量
     content.line += linesCount;
@@ -40,4 +42,15 @@ export const parseTextData = (content,endIndex) => {
     const rawText = content.source.slice(0,endIndex);
     advanceBy(content,endIndex); // 在 content.source 中把文本内容删除掉
     return rawText;
+}
+
+
+export const getSelection = (content,start,end?) => {
+    // let {line,column,offset,source} = content;
+    end = end || getCursor(content)
+    return {
+        start,
+        end,
+        source: content.originalSource.slice(start.offset,end.offset)
+    }
 }

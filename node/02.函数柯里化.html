@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        /**
+         * 一般柯里化参数要求，都是一个个的传 -》 偏函数
+         * 
+         */
+
+        // let flag = isType(123,'Number')
+        // console.log(flag);
+
+        // 实现通用的柯里化函数(柯里化的要求，参数是已知的)
+
+        // 记录每次调用时传入的参数，并且和函数的参数个数进行比较，如果不满足总个数，就返回新函数，如果传入的个数 和 参数 一致，执行原来的函数
+        
+        function isType(typing,val){
+            return Object.prototype.toString.call(val) == `[object ${typing}]`;
+        } 
+
+        function curring(cb) {
+            // cb.length 对应的是 cb 函数，参数的个数
+            // 存储每次调用时传入的变量
+            const inner = (args = []) => {
+                return args.length >= cb.length ? cb(...args) : (...userArgs) => inner([...args, ...userArgs])
+            }
+            return inner();
+        }
+
+        let util = {};
+        ['String','Number','Boolean','Null','Undefined'].forEach(type => {
+            util[`is${type}`] = curring(isType)(type)
+        })
+        // console.log(util);
+        console.log(util.isString('123'));
+        // function curry(cb,...params) {
+        //     const lg = cb.length;
+
+        //     return params.length >= cb.length ? cb(...params) : (...userParams) => curry(cb,[...params,...userParams])
+        // }
+
+        // function sum(a, b, c, d) {
+        //     return a + b + c + d;
+        // }
+
+        // // debugger
+        // let sum1 = curring(sum);
+        // let sum2 = sum1(1);
+        // let sum3 = sum2(2, 3);
+        // let res = sum3(4);
+
+        // console.log(res); 
+    </script>
+</body>
+
+</html>
