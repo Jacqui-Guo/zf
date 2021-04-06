@@ -2030,6 +2030,592 @@ baby.setState('我饿了')
 宝宝说：mother 我饿了
 ```
 
+## Promise	
+
+##### 手动实现最基本的promise
+
+**分析**
+
+* `promise是一个类，无需考虑兼容性`
+* `当前 executor 给了两个函数，可以来描述当前promise的状态`
+* `当 new Promise 的时候，class Promise 中的 constructor 会立即执行`
+* `promise 有三个状态：成功态，失败态，等待态,状态从 pending -> fulfilled, pending -> rejected 这个转换过程是不可逆的 `
+
+**使用：**
+
+```js
+let Promise = require('./source/1.promise');
+
+let promise = new Promise((resolve,reject) => {
+    console.log(1);
+    // reject('失败')
+    resolve('成功')
+ }) 
+ 
+ promise.then(res => {
+    console.log('success',res);
+ },err => {
+    console.log('fail',err);
+})
+```
+
+**实现**
+
+```js
+const PENDING = 'PENDING';
+const FULFILLED = 'FULFILLED';
+const REJECTED = 'REJECTED';
+
+class Promise {
+    constructor(executor){
+        this.status = PENDING;
+        this.successVal = undefined; // 记录成功的原因
+        this.errorVal = undefined; // 记录失败的原因
+        const resolve = (value) => {
+            // 添加判断的原因是因为状态是不可逆的，防止成功之后，再走失败的回掉
+            if(this.status === PENDING){
+                this.status = FULFILLED;
+                this.successVal = value;
+            }
+        }
+        const reject = (error) => {
+            if(this.status === PENDING){
+                this.status = REJECTED;
+                this.errorVal = error;
+            }
+        }
+        executor(resolve,reject);
+    }
+    then(onFulilled,onRejected){
+        if(this.status === FULFILLED){
+            onFulilled(this.successVal);
+        }
+        if(this.status === REJECTED){
+            onRejected(this.errorVal);
+        }
+    }
+}
+
+module.exports = Promise;
+```
+
+##### 异步的promise
+
+**分析：**
+
+* `状态为 pending , 1秒钟之后状态改为 fulfilled, rejected`
+* `需要把状态触发的函数存储起来`
+* `当状态发生改变，触发对应的函数执行`
+
+> 这个过程就是发布订阅
+
+* `使用了函数切片思想`
+
+**使用：**
+
+```js
+let Promise = require('./source/1.promise');
+
+let promise = new Promise((resolve,reject) => {
+   setTimeout(() => {
+      resolve('成功')
+   },1000)
+ }) 
+ 
+ promise.then(res => {
+    console.log('success',res);
+ },err => {
+    console.log('fail',err);
+})
+
+// 过了 1秒钟 输出：success, 成功
+```
+
+**实现：**
+
+```js
+const PENDING = 'PENDING';
+const FULFILLED = 'FULFILLED';
+const REJECTED = 'REJECTED';
+
+class Promise {
+    constructor(executor){
+        this.status = PENDING;
+        this.successVal = undefined; // 记录成功的原因
+        this.errorVal = undefined; // 记录失败的原因
+
+        this.onFulilledCb = []; // 存储成功状态时的回掉函数
+        this.onRejectedCb = []; // 存储失败状态时的回掉函数
+
+        const resolve = (value) => {
+            // 添加判断的原因是因为状态是不可逆的，防止成功之后，再走失败的回掉
+            if(this.status === PENDING){
+                this.status = FULFILLED;
+                this.successVal = value;
+								++++++++++++++++++++++++
+                // 发布
+                this.onFulilledCb.forEach(fn=>{
+                    fn()
+                })
+                ++++++++++++++++++++++++
+            }
+        }
+        const reject = (error) => {
+            if(this.status === PENDING){
+                this.status = REJECTED;
+                this.errorVal = error;
+                ++++++++++++++++++++++++  
+              	// 发布
+                this.onRejectedCb.forEach(fn=>{
+                    fn()
+                })
+              	++++++++++++++++++++++++
+            }
+        }
+        executor(resolve,reject);
+    }
+    then(onFulilled,onRejected){
+       ++++++++++++++++++++++++  
+      	if(this.status === PENDING){
+            // 订阅
+
+            // 函数切片 AOP
+            // 1. 可以把每个状态的 对应的参数 缓存起来
+            // 2. 函数调用时，不用再传递参数
+            // 3. 可以做一些额外的逻辑操作
+            // this.onFulilledCb.push(onFulilled(this.successVal));
+            this.onFulilledCb.push(()=>{
+                // todo....
+                onFulilled(this.successVal)
+            })
+            this.onRejectedCb.push(()=>{
+                onRejected(this.errorVal)
+            });
+        }
+				++++++++++++++++++++++++
+        if(this.status === FULFILLED){
+            onFulilled(this.successVal);
+        }
+        if(this.status === REJECTED){
+            onRejected(this.errorVal);
+        }
+    }
+}
+
+module.exports = Promise;
+```
+
+##### 链式调用的promise
+
+**分析**
+
+* `promise函数的返回值为一个新的promise`
+* `在resolvePromise函数中，处理链式调用的问题，需要拿到当前的promise,新返回的promise，当前promise成功与失败的回掉`
+* `为了能拿到promise2，所以在 try...catch外层添加了定时器`
+* 
+
+**使用**
+
+```js
+情况一：正常的链式调用
+
+new Promise((resolve, reject) => {
+   resolve('success')
+}).then(res => {
+   console.log('成功1', res)
+   // 当没有返回值的情况，即 对应的是：return undefined; 执行下一个 promise 的成功
+}, err => {
+   console.log('失败1', err)
+}).then(res => {
+   console.log('成功2', res) // '成功2' undefined
+
+   throw new Error(); // 执行下一个 promise 的失败, => 失败3
+}, err => {
+   console.log('失败2', err)
+}).then(res => {
+   console.log('成功3', res)
+}, err => {
+   console.log('失败3', err)
+})
+// 成功1 success
+// 成功2 undefined
+// 失败3 
+```
+
+```js
+情况二：promise 执行成功之后，返回一个新的promise
+let promise2 = new Promise((resolve,reject)=>{
+      resolve(1)
+}).then(()=>{
+  return promise2;
+})
+ 
+所以在resolvePromise中增加了这段代码
+if(promise2 === x) {
+  return reject(new TypeError('错误'));
+}
+```
+
+```js
+// 情况3: 调用.then 不传递参数
+new Promise((resolve,reject)=>{
+   resolve('1')
+}).then().then(res=>{
+   console.log(res)
+})
+
+在 then() 中增加了这段代码
+onFulilled = typeof onFulilled === 'function' ? onFulilled :  v => v;
+onRejected = typeof onRejected === 'function' ? onRejected :  err => { throw err };
+```
+
+**实现**
+
+```js
+
+const PENDING = 'PENDING';
+const FULFILLED = 'FULFILLED';
+const REJECTED = 'REJECTED';
+/**
+ * 
+ * @param {*} promise2  新的promise (promise执行完成之后，返回一个新的promise)
+ * @param {*} x         当前的promise
+ * @param {*} resolve   当前promise成功的回掉 
+ * @param {*} reject    当前promise失败的回掉
+ */
+function resolvePromise (promise2,x,resolve,reject){
+    // 这种情况会构成死循环
+    if(promise2 === x) {
+        return reject(new TypeError('错误'));
+    }
+
+    // promise 返回 object,或function的情况
+    if((typeof x === 'object' && x !== null) || typeof x === 'function' ){
+        // 处理别人的promise调用成功之后还能再次调用的失败的情况，确保 promise 符合规范 
+        let called = false;
+
+        try{
+            let then = x.then;
+            if(typeof then === 'function'){
+                // x(当前promise) 是一个promise
+                // x.then
+                then.call(x,resolveCb=>{
+                    if(called) return;
+                    called = true;
+
+                    resolvePromise(promise2,resolveCb,resolve,reject)
+                },rejectCb=>{
+                    if(called) return;
+                    called = true;
+
+                    reject(rejectCb)
+                })
+            } else { // x= {} 或者 x = {then:...}
+                resolve(x);
+            }
+        }catch(e){
+            if(called) return;
+            called = true;
+
+            reject(e);
+        }
+    } else { // promise返回的是普通值
+        resolve(x);
+    }
+
+}
+
+class Promise {
+    constructor(executor){
+        this.status = PENDING;
+        this.successVal = undefined; // 记录成功的原因
+        this.errorVal = undefined; // 记录失败的原因
+
+        this.onFulilledCb = []; // 存储成功状态时的回掉函数
+        this.onRejectedCb = []; // 存储失败状态时的回掉函数
+
+        const resolve = (value) => {
+            // 添加判断的原因是因为状态是不可逆的，防止成功之后，再走失败的回掉
+            if(this.status === PENDING){
+                this.status = FULFILLED;
+                this.successVal = value;
+
+                // 发布
+                this.onFulilledCb.forEach(fn=>{
+                    return fn()
+                })
+            }
+        }
+        const reject = (error) => {
+            if(this.status === PENDING){
+                this.status = REJECTED;
+                this.errorVal = error;
+                // 发布
+                this.onRejectedCb.forEach(fn=>{
+                    return fn()
+                })
+            }
+        }
+        try{
+            executor(resolve,reject);
+        }catch(e){
+            reject(e)   
+        }
+    }
+    then(onFulilled,onRejected){
+        // 调用.then/.catch 不传递参数
+        // v 就是 promise resolve 返回的数据
+        // err 就是 promise reject 返回的数据
+        onFulilled = typeof onFulilled === 'function' ? onFulilled :  v => v;
+        onRejected = typeof onRejected === 'function' ? onRejected :  err => { throw err };
+
+
+        let promise2 = new Promise((resolve,reject)=>{
+            if(this.status === PENDING){
+                // 订阅
+    
+                // 函数切片 AOP
+                this.onFulilledCb.push(()=>{
+                    // todo....
+                    setTimeout(() => {
+                        try{
+                            let x = onFulilled(this.successVal)
+                            // resolve(x)
+                            resolvePromise(promise2,x,resolve,reject);
+                        }catch(e){
+                            reject(e);
+                        }
+                    }, 0);
+                })
+                this.onRejectedCb.push(()=>{
+                    setTimeout(() => {
+                        try{
+                            let x = onRejected(this.errorVal)
+                            // resolve(x)
+                            resolvePromise(promise2,x,resolve,reject);
+                        }catch(e){
+                            reject(e)
+                        }
+                    }, 0);
+                });
+            }
+    
+            if(this.status === FULFILLED){
+                // try...catch... 捕捉的是同步的
+                // 添加定时器，是为了能够获取到promise2
+                setTimeout(()=>{
+                    try{
+                        let x = onFulilled(this.successVal);
+                        // resolve(x);
+                        resolvePromise(promise2,x,resolve,reject);
+                    }catch(e){
+                        reject(e);
+                    }
+                },0)
+            }
+            if(this.status === REJECTED){
+                setTimeout(()=>{
+                    try{
+                        let x = onRejected(this.errorVal);
+                        resolvePromise(promise2,x,resolve,reject);
+                    }catch(e){
+                        reject(e);
+                    }
+                },0)
+            }
+        });
+        return promise2;
+    }
+}
+
+module.exports = Promise;
+```
+
+##### promise测试
+
+1. `https://promisesaplus.com/` 最底部 `Compliance Tests` 规范测试
+
+2. `测试需要有一个入口文件，写在你的promise文件的底部`
+
+   ```js
+    // 测试 dfd 对象上的 promise,resolve,reject 是否符合规范
+      Promise.deferred = function(){
+       let dfd = {};
+       dfd.promise = new Promise((resolve,reject)=>{
+           dfd.resolve = resolve;
+           dfd.reject = reject;
+       })
+       return dfd;
+      }
+   ```
+
+3. `npm install promises-aplus-tests -g`
+
+4. 在当前要测试的文件目录下打开终端： promises-aplus-tests yourProjectName.js
+
+5. 会测试当前自己写的promise是否符合规范
+
+#### Promise.all
+
+> 所有的成功才成功，有一个失败就失败了（ 同步 (同一时刻拿到) 多个异步请求的结果）
+
+**分析**
+
+* `并发，就是 for循环，将所有的函数都执行一下，把结果存到一个数组中`
+* `如果拿到的值不是promise，是一个普通值，则直接将结果放到数组中`
+* `如果拿到的是一个promise,执行resolve，然后将结果存储到数组中`
+* `all 如果失败了，成功的值就不返回了，因为是并发，当前函数失败，并不会影响其它函数的执行`
+
+**使用**
+
+```js
+let Promise = require('./source/5.promise-all'); 
+Promise.all([1,2,3,new Promise((resolve,reject)=>{
+    setTimeout(() => {
+        resolve('成功')
+    }, 1000);
+}),new Promise((resolve,reject)=>{
+    setTimeout(() => {
+        reject('失败')
+    }, 1500);
+})])
+.then(data => {
+    // data 是一个数组
+    console.log('success',data);
+}).catch(err =>{
+    console.log('err',err);
+})
+```
+
+**实现**
+
+```js
+Promise.all = function(promises){
+    return new Promise((resolve,reject)=>{
+        let result = [];
+        let times = 0;
+        const resolveSuccess = (index,data) =>{
+            result[index] = data;
+            // if(result.length === promises.length){
+            //  这样判断是不对的，如果最后一个先成功了 
+            //  如果给result第100项赋值 result[100]=1 ，此时result的长度为101
+            // }
+            if(++times === promises.length){
+                resolve(result)
+            } 
+        }
+
+        for(let i = 0;i < promises.length;i++){
+            let _p = promises[i]
+            // 如果拿到的值不是promise，是一个普通值，则直接将结果放到数组中
+            if(_p && typeof _p.then === 'function'){ // 当前值是一个promise
+                _p.then(data=>{
+                    resolveSuccess(i,data)
+                },reject) // 如果其中某一个promise失败了，则直接执行失败即可
+            } else { // 普通值
+                resolveSuccess(i,_p) 
+            }
+        }
+    })
+}
+```
+
+#### Promise.finally
+
+> 原型上的finally
+
+`Promise.prototype.finally 不是最后执行，而是无论如何(成功或失败)都会执行，但是可以继续执行下去`
+
+**注意：**
+
+1. 如果 `finally` 中函数是 `resolve` ,会等待 finally 中 promise 执行完毕，然后采用 `new Promise()` 执行函数返回的结果
+2. 如果是 `reject` ,则会将失败的结果返回，不会再走成功
+3. 如果 `finally` 没有`return` 结果，则不会走 promise 的成功 `Promise.resolve(cb())` ，而是直接走失败，将 `undefined` 返回
+
+```js
+let p1 = new Promise((resolve,reject)=>{
+ setTimeout(()=>{
+   reject('失败')
+ },3000) 
+}).finally(data=>{ // finally 无论状态如何都会执行
+  console.log('finally',data); // finaly undefined
+  return new Promise((resolve,reject)=>{
+    setTimeout(()=>{
+      resolve(1000)
+    },1000)
+  })
+  // ⚠️ finally 会等到return代码执行完毕，但是并不会采用return 代码执行的最终结果，而是采用finally之前代码的执行结果
+}).then(data =>{
+  console.log(data);
+}).catch(e=>{
+  console.log('catch',e);
+})
+
+//  finaly undefined
+// catch error
+```
+
+**手动实现：**
+
+```js
+Promise.property.finally = function(cb){
+  return this.then((data)=>{
+    // 如何保证promise执行完
+    return Promise.resolve(cb()).then(n=>{
+      return data;
+    })
+    // 会等待当前finally函数执行完毕，并且把上一层函数的执行结果返回
+  },(err)=>{
+    return Promise.resolve(cb()).then(e=>{throw err})
+  })
+}
+```
+
+
+
+#### Promise.race
+
+> **(谁先执行完成，就采用谁都结果) ** 有一个成功或失败就采用他的结果
+>
+> 一般用于处理：超时
+
+**注意：**
+
+1. `race 方法如果其中一个完成了，其它的还是会继续执行，只是没有采用他的结果`
+2. `race 方法可以传递普通值，如果传递的执行函数中包含普通值，则使用普通值作用执行的最终结果`
+
+```js
+let p1 = new Promise((resolve,reject)=>{
+  setTimeout(()=>{
+    reject('失败')
+  }，1000)
+})
+
+let p2 = new Promise((resolve,reject)=>{
+  setTimeout(()=>{
+    reject('成功')
+  }，3000)
+})
+
+Promise.race([p1,p2]).then(data=>{
+  console.log(data);
+}).catch(err=>{
+  console.log(err);
+})
+
+Promise.race([p1,p2,1]).then(data=>{
+  console.log(data);
+}).catch(err=>{
+  console.log(err);
+})
+```
+
+#### 作业
+
+1. Promise.allSelected([p1,p2]) 会获得所有的结果，不会走 catch 方法
+2. Promise.any([p1,p2]) 如果其中一个成功了，就会走成功，取出的是第一个成功的值
+   * 如果都失败了，才会走失败
+3. `promisify`
 
 
 
@@ -2041,14 +2627,30 @@ baby.setState('我饿了')
 
 
 
+#### `async + await + generator`
 
+**注意：**
 
+1. `promise` 并没有解决回掉地狱，只是优化了处理回掉函数的方式 (其底层实现原理还是使用回掉函数)
+2. `generator` 可以把函数的执行权交出去 `* /yield`
+3. `async , await ` 是基于 `generator` 的语法糖
 
+```js
+function * read() { // 它执行的结果叫迭代器
+  console.log(1);
+  yield 1;
+  console.log(2);
+  yield 2;
+  console.log(3);
+  yield 3;
+}
 
+let it = read(); // 默认没有执行
 
-
-
-
+//分步执行，一步一步去执行
+it.next(); // 1
+it.next(); // 
+```
 
 
 
