@@ -24,11 +24,7 @@ const fs = require('fs');
 
 let readFile = util.promisify(fs.readFile)
 
-// function * read(){
-//    let data = yield readFile('./a.txt','utf8'); // 默认路径是项目根目录
-//    data = yield readFile(data,'utf8');
-//    return data;
-// }
+// 写法一： --------------------------------------
 
 // let it = read();
 // let {value,done} = it.next(); // value 就是 yiled 后面的返回值
@@ -43,6 +39,8 @@ let readFile = util.promisify(fs.readFile)
 // })
 
 // 上面的代码有点不忍直视
+
+// 写法二： --------------------------------------
 // TJ库中有个 co 库
 
 // npm install co
@@ -58,7 +56,7 @@ function co(it){
                 resolve(data)
             } else {
                 Promise.resolve(value).then(data=>{
-                    next(data)
+                    next
                 },err=>{
                     reject(err)
                 })
@@ -77,15 +75,29 @@ function co(it){
     })
 }
 
-co(read()).then(data=>{
-    console.log(data);
-})
+// co(read()).then(data=>{
+//     console.log(data);
+// })
 
 
 // generator + co 让代码看起来更像同步，但是需要 co 库
 // * 变成 async, yield 变成 await
-function * read(){
-    let data = yield readFile('./a.txt','utf8'); // 默认路径是项目根目录
-    data = yield readFile(data,'utf8');
+
+// function * read(){
+//     let data = yield readFile('./a.txt','utf8'); // 默认路径是项目根目录
+//     data = yield readFile(data,'utf8');
+//     return data;
+// }
+
+
+// 写法三： --------------------------------------
+// async，await 的实现原理： 就是generator + co 的语法糖
+async function read(){
+    let data = await readFile('./a.txt','utf8'); // 默认路径是项目根目录
+    data = await readFile(data,'utf8');
     return data;
- }
+}
+
+read().then(res=>{
+    console.log(res)
+})

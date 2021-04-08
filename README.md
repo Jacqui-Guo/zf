@@ -2619,14 +2619,6 @@ Promise.race([p1,p2,1]).then(data=>{
 
 
 
-
-
-
-
-
-
-
-
 #### `async + await + generator`
 
 **注意：**
@@ -2652,7 +2644,9 @@ it.next(); // 1
 it.next(); // 
 ```
 
+#### 回顾 co 函数的写法
 
+#### 回顾 common.js 规范的实现
 
 
 
